@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-	"serve-wechat-gin/database"
-	"serve-wechat-gin/models/system"
+	"south-admin-gin/database"
+	"south-admin-gin/models/system"
 	"strconv"
 	"time"
 )
@@ -23,7 +23,6 @@ func GetRoleByID(id int) (*models.Role, error) {
 	var role models.Role
 	err := database.DB.Where("id = ? AND is_deleted = 0", id).
 		Preload("Menus").
-		Preload("Permissions").
 		First(&role).Error
 	if err != nil {
 		return nil, err
@@ -35,7 +34,6 @@ func GetRoleByID(id int) (*models.Role, error) {
 func GetRolesByIDs(ids []int) ([]models.Role, error) {
 	var roles []models.Role
 	err := database.DB.Where("id IN ? AND is_deleted = 0", ids).
-		Preload("Permissions").
 		Find(&roles).Error
 	if err != nil {
 		return nil, err
@@ -158,8 +156,7 @@ func GetRolePage(page, pageSize int, name string) (*models.PageResult, error) {
 
 	offset := (page - 1) * pageSize
 	err = query.Offset(offset).Limit(pageSize).
-		Preload("Permissions").
-		Preload("Menus").
+		Preload("Menus.Permission").
 		Order("created_at DESC").
 		Find(&roles).Error
 	if err != nil {
@@ -175,9 +172,16 @@ func GetRolePage(page, pageSize int, name string) (*models.PageResult, error) {
 
 	var items []RoleWithCounts
 	for _, role := range roles {
+		// 通过菜单统计权限数量（去重）
+		permissionIds := make(map[int64]bool)
+		for _, menu := range role.Menus {
+			if menu.PermissionID != nil {
+				permissionIds[*menu.PermissionID] = true
+			}
+		}
 		items = append(items, RoleWithCounts{
 			Role:            role,
-			PermissionCount: len(role.Permissions),
+			PermissionCount: len(permissionIds),
 			MenuCount:       len(role.Menus),
 		})
 	}
@@ -239,16 +243,14 @@ func SaveRoleAuthorize(roleId int, menuIds []int) error {
 func updateRoleAuthorize(roleId int64, menuIds []int) error {
 	// 清除原有关联
 	database.DB.Table("role_menu").Where("role_id = ?", roleId).Delete(nil)
-	database.DB.Table("role_permission").Where("role_id = ?", roleId).Delete(nil)
 
 	if len(menuIds) == 0 {
 		return nil
 	}
 
-	// 查询菜单及其关联的权限
+	// 查询菜单
 	var menus []models.Menu
 	err := database.DB.Where("id IN ? AND is_deleted = 0", menuIds).
-		Preload("Permission").
 		Find(&menus).Error
 	if err != nil {
 		return err
@@ -260,14 +262,6 @@ func updateRoleAuthorize(roleId int64, menuIds []int) error {
 			"role_id": roleId,
 			"menu_id": menu.ID,
 		})
-
-		// 关联权限
-		if menu.PermissionID != nil {
-			database.DB.Table("role_permission").Create(map[string]interface{}{
-				"role_id":       roleId,
-				"permission_id": *menu.PermissionID,
-			})
-		}
 	}
 
 	return nil

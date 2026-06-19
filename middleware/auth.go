@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	"serve-wechat-gin/models/system"
-	"serve-wechat-gin/services/system"
+	"south-admin-gin/models/system"
+	"south-admin-gin/services/system"
 	"strings"
 
 	"github.com/gin-gonic/gin"

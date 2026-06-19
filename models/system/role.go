@@ -11,8 +11,7 @@ type Role struct {
 	DeletedAt   CustomTime `json:"-" gorm:"comment:删除时间"`
 
 	// 关联关系
-	Menus       []Menu       `json:"menus" gorm:"many2many:role_menu;"`
-	Permissions []Permission `json:"permissions" gorm:"many2many:role_permission;"`
+	Menus []Menu `json:"menus" gorm:"many2many:role_menu;"`
 }
 
 // TableName 指定表名

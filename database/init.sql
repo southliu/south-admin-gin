@@ -6,7 +6,6 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- 删除现有数据
 DELETE FROM `user_role`;
-DELETE FROM `role_permission`;
 DELETE FROM `role_menu`;
 DELETE FROM `sys_menu`;
 DELETE FROM `sys_permission`;
@@ -70,42 +69,6 @@ INSERT INTO `user_role` (user_id, role_id)
 VALUES
     ((SELECT id FROM `sys_user` WHERE username='admin'), (SELECT id FROM `sys_role` WHERE name='admin')),
     ((SELECT id FROM `sys_user` WHERE username='user1'), (SELECT id FROM `sys_role` WHERE name='user'));
-
--- 关联角色与权限
-INSERT INTO `role_permission` (role_id, permission_id)
-VALUES
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/dashboard')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/demo')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/demo/copy')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/demo/editor')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/demo/wangEditor')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/demo/virtualScroll')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/demo/watermark')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user/index')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user/create')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user/update')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user/view')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user/delete')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/user/authority')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/role')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/role/index')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/role/create')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/role/update')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/role/view')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/role/delete')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/menu')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/menu/index')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/menu/create')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/menu/update')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/menu/view')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/authority/menu/delete')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/content/article')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/content/article/index')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/content/article/create')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/content/article/update')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/content/article/view')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_permission` WHERE name='/content/article/delete'));
 
 -- 禁用外键约束检查
 SET FOREIGN_KEY_CHECKS = 0;

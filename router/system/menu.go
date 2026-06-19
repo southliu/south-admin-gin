@@ -1,7 +1,7 @@
 package system
 
 import (
-	v1 "serve-wechat-gin/api/v1/system"
+	v1 "south-admin-gin/api/v1/system"
 
 	"github.com/gin-gonic/gin"
 )

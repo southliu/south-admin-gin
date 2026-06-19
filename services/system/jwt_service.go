@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"serve-wechat-gin/config"
+	"south-admin-gin/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -34,7 +34,7 @@ func GenerateToken(userID int64, username string) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expireHour) * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "serve-wechat",
+			Issuer:    "south-admin",
 		},
 	}
 

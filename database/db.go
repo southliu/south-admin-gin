@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"log"
-	"serve-wechat-gin/config"
-	"serve-wechat-gin/models/system"
+	"south-admin-gin/config"
+	"south-admin-gin/models/system"
 	"time"
 
 	"gorm.io/driver/mysql"

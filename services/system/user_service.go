@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-	"serve-wechat-gin/database"
-	"serve-wechat-gin/models/system"
+	"south-admin-gin/database"
+	"south-admin-gin/models/system"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -14,7 +14,7 @@ func GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	err := database.DB.Where("username = ? AND is_deleted = 0", username).
 		Preload("Roles").
-		Preload("Roles.Permissions").
+		Preload("Roles.Menus.Permission").
 		First(&user).Error
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func GetUserByID(id int64) (*models.User, error) {
 	var user models.User
 	err := database.DB.Where("id = ? AND is_deleted = 0", id).
 		Preload("Roles").
-		Preload("Roles.Permissions").
+		Preload("Roles.Menus.Permission").
 		First(&user).Error
 	if err != nil {
 		return nil, err
@@ -319,13 +319,15 @@ func GetUserPermissions(user *models.User) []string {
 	return getUserPermissions(user)
 }
 
-// getUserPermissions 获取用户权限列表（从角色获取）
+// getUserPermissions 获取用户权限列表（通过角色的菜单获取权限）
 func getUserPermissions(user *models.User) []string {
 	permissionSet := make(map[string]bool)
 
 	for _, role := range user.Roles {
-		for _, p := range role.Permissions {
-			permissionSet[p.Name] = true
+		for _, menu := range role.Menus {
+			if menu.Permission != nil {
+				permissionSet[menu.Permission.Name] = true
+			}
 		}
 	}
 

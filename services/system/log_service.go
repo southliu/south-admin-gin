@@ -1,8 +1,8 @@
 package services
 
 import (
-	"serve-wechat-gin/database"
-	"serve-wechat-gin/models/system"
+	"south-admin-gin/database"
+	"south-admin-gin/models/system"
 )
 
 // CreateLog 创建日志

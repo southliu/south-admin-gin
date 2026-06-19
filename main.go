@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"serve-wechat-gin/config"
-	"serve-wechat-gin/database"
-	"serve-wechat-gin/router"
+	"south-admin-gin/config"
+	"south-admin-gin/database"
+	"south-admin-gin/router"
 )
 
 func main() {

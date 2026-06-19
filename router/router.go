@@ -1,7 +1,7 @@
 package router
 
 import (
-	"serve-wechat-gin/router/system"
+	"south-admin-gin/router/system"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-	"serve-wechat-gin/database"
-	"serve-wechat-gin/models/system"
+	"south-admin-gin/database"
+	"south-admin-gin/models/system"
 	"strconv"
 	"time"
 )
@@ -61,11 +61,6 @@ func CreateMenu(dto models.CreateMenuDto, userId int64) (*models.Menu, error) {
 		}
 		menu.PermissionID = &permission.ID
 		database.DB.Save(&menu)
-
-		// 将权限关联到用户的角色
-		if err := associatePermissionToUserRoles(userId, permission.ID); err != nil {
-			return nil, err
-		}
 	}
 
 	// 将菜单关联到用户的角色
@@ -197,9 +192,6 @@ func DeleteMenu(id int64) error {
 		}
 	}
 	if permissionFound {
-		// 删除角色与权限的关联
-		database.DB.Table("role_permission").Where("permission_id = ?", permission.ID).Delete(nil)
-
 		// 软删除权限
 		database.DB.Model(&permission).Updates(map[string]interface{}{
 			"is_deleted": 1,
@@ -268,9 +260,6 @@ func BatchDeleteMenu(ids []int64) error {
 	}
 
 	if len(permissionIds) > 0 {
-		// 删除角色与权限的关联
-		database.DB.Table("role_permission").Where("permission_id IN ?", permissionIds).Delete(nil)
-
 		// 批量软删除权限
 		database.DB.Model(&models.Permission{}).Where("id IN ?", permissionIds).Updates(map[string]interface{}{
 			"is_deleted": 1,
@@ -518,30 +507,6 @@ func getOrCreatePermission(name, description string) (*models.Permission, error)
 	return &permission, nil
 }
 
-// associatePermissionToUserRoles 将权限关联到用户的角色
-func associatePermissionToUserRoles(userId int64, permissionId int64) error {
-	var user models.User
-	err := database.DB.Where("id = ?", userId).Preload("Roles").First(&user).Error
-	if err != nil {
-		return err
-	}
-
-	for _, role := range user.Roles {
-		// 检查是否已存在关联
-		var count int64
-		database.DB.Table("role_permission").
-			Where("role_id = ? AND permission_id = ?", role.ID, permissionId).
-			Count(&count)
-		if count == 0 {
-			database.DB.Table("role_permission").Create(map[string]interface{}{
-				"role_id":       role.ID,
-				"permission_id": permissionId,
-			})
-		}
-	}
-	return nil
-}
-
 // associateMenuToUserRoles 将菜单关联到用户的角色
 func associateMenuToUserRoles(userId int64, menuId int64) error {
 	var user models.User
@@ -607,11 +572,6 @@ func createButtonMenus(parentMenu *models.Menu, actions []string, rule string, u
 
 		err = database.DB.Create(&buttonMenu).Error
 		if err != nil {
-			return err
-		}
-
-		// 关联权限到用户的角色
-		if err := associatePermissionToUserRoles(userId, permission.ID); err != nil {
 			return err
 		}
 

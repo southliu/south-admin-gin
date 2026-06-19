@@ -2,8 +2,8 @@ package v1
 
 import (
 	"net/http"
-	"serve-wechat-gin/models/system"
-systemServices "serve-wechat-gin/services/system"
+	"south-admin-gin/models/system"
+systemServices "south-admin-gin/services/system"
 	"strconv"
 
 	"github.com/gin-gonic/gin"

@@ -1,4 +1,4 @@
-module serve-wechat-gin
+module south-admin-gin
 
 go 1.26.4
 

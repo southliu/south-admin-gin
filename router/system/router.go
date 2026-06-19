@@ -1,7 +1,7 @@
 package system
 
 import (
-	"serve-wechat-gin/middleware"
+	"south-admin-gin/middleware"
 
 	"github.com/gin-gonic/gin"
 )

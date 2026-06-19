@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-	"serve-wechat-gin/database"
-	"serve-wechat-gin/models/system"
+	"south-admin-gin/database"
+	"south-admin-gin/models/system"
 	"time"
 )
 
