@@ -61,3 +61,4 @@ bin/
 
 # Claude memory (optional - comment out if you want to track it)
 .claude/
+gui-test-screenshots

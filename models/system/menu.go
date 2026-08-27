@@ -63,5 +63,5 @@ type UpdateMenuDto struct {
 // ChangeMenuStateDto 修改菜单状态请求
 type ChangeMenuStateDto struct {
 	ID    int64 `json:"id" binding:"required"`
-	State int   `json:"state" binding:"required"`
+	State int   `json:"state"` // 0=隐藏 1=显示，零值合法，不能加 required
 }

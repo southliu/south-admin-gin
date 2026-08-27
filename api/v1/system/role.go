@@ -12,7 +12,7 @@ systemServices "south-admin-gin/services/system"
 // GetRolePage 获取角色分页列表
 func GetRolePage(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", c.DefaultQuery("page_size", "10")))
 	name := c.Query("name")
 
 	result, err := systemServices.GetRolePage(page, pageSize, name)

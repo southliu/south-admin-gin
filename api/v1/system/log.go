@@ -37,7 +37,7 @@ func CreateLog(c *gin.Context) {
 // GetLogPage 获取日志分页列表
 func GetLogPage(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", c.DefaultQuery("page_size", "10")))
 	username := c.Query("username")
 	logType, _ := strconv.Atoi(c.DefaultQuery("type", "-1"))
 

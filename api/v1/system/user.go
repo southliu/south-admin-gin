@@ -131,10 +131,13 @@ func RefreshPermissions(c *gin.Context) {
 // GetUserPage 获取用户分页列表
 func GetUserPage(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	username := c.Query("username")
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", c.DefaultQuery("page_size", "10")))
 
-	result, err := systemServices.GetUserPage(page, pageSize, username)
+	result, err := systemServices.GetUserPage(page, pageSize, systemServices.UserPageFilter{
+		Username: c.Query("username"),
+		Email:    c.Query("email"),
+		Phone:    c.Query("phone"),
+	})
 	if err != nil {
 		c.JSON(http.StatusOK, models.CommonResponse{
 			Code:    500,
@@ -180,16 +183,16 @@ func GetUserDetail(c *gin.Context) {
 		Code:    200,
 		Message: "获取成功",
 		Data: map[string]interface{}{
-			"id":         user.ID,
-			"username":   user.Username,
-			"name":       user.Name,
-			"email":      user.Email,
-			"phone":      user.Phone,
-			"status":     user.Status,
-			"role_ids":   roleIds,
-			"roles":      user.Roles,
-			"created_at": user.CreatedAt,
-			"updated_at": user.UpdatedAt,
+			"id":        user.ID,
+			"username":  user.Username,
+			"name":      user.Name,
+			"email":     user.Email,
+			"phone":     user.Phone,
+			"status":    user.Status,
+			"roleIds":   roleIds,
+			"roles":     user.Roles,
+			"createdAt": user.CreatedAt,
+			"updatedAt": user.UpdatedAt,
 		},
 	})
 }
@@ -280,6 +283,42 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, models.CommonResponse{
 		Code:    200,
 		Message: "删除成功",
+	})
+}
+
+// BatchDeleteUser 批量删除用户
+func BatchDeleteUser(c *gin.Context) {
+	var dto struct {
+		IDs []int64 `json:"ids"`
+	}
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		c.JSON(http.StatusOK, models.CommonResponse{
+			Code:    400,
+			Message: "参数错误: " + err.Error(),
+		})
+		return
+	}
+
+	if len(dto.IDs) == 0 {
+		c.JSON(http.StatusOK, models.CommonResponse{
+			Code:    400,
+			Message: "请选择要删除的用户",
+		})
+		return
+	}
+
+	err := systemServices.BatchDeleteUser(dto.IDs)
+	if err != nil {
+		c.JSON(http.StatusOK, models.CommonResponse{
+			Code:    500,
+			Message: "批量删除用户失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.CommonResponse{
+		Code:    200,
+		Message: "批量删除成功",
 	})
 }
 

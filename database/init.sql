@@ -15,7 +15,7 @@ DELETE FROM `sys_user`;
 -- 重新启用外键约束检查
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 插入用户表数据（密码已加密，明文为 admin123）
+-- 插入用户表数据（密码已加密，明文为 admin123456）
 INSERT INTO `sys_user` (username, password, name, email, status, is_deleted, created_at, updated_at)
 VALUES
     ('admin', '$2b$10$07h7npcIysHutrLYCY3yWOhEqtGTCR88pDp66ZztkAdG7RJT/4ZDO', '超级管理员', 'admin@example.com', 1, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()),
@@ -62,7 +62,10 @@ VALUES
     ('/content/article/update', '修改文章', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0),
     ('/content/article/view', '查看文章', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0),
     ('/content/article/delete', '删除文章', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0),
-    ('/link', '外部链接', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0);
+    ('/link', '外部链接', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0),
+    ('/authority/log', '日志管理', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0),
+    ('/authority/log/index', '日志列表', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0),
+    ('/authority/log/delete', '删除日志', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0);
 
 -- 关联用户与角色
 INSERT INTO `user_role` (user_id, role_id)
@@ -152,6 +155,10 @@ INSERT INTO `sys_menu` (label, label_en, type, icon, router, `order`, state, cre
 SELECT '角色管理', 'Role Management', 2, NULL, '/system/role', 2, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/authority/role')
 FROM (SELECT id FROM `sys_menu` WHERE router = '/system') AS parent_menu;
 
+INSERT INTO `sys_menu` (label, label_en, type, icon, router, `order`, state, created_at, updated_at, parent_id, is_deleted, permission_id)
+SELECT '日志管理', 'Log Management', 2, NULL, '/system/log', 99, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/authority/log')
+FROM (SELECT id FROM `sys_menu` WHERE router = '/system') AS parent_menu;
+
 -- 插入内容管理子菜单
 INSERT INTO `sys_menu` (label, label_en, type, icon, router, `order`, state, created_at, updated_at, parent_id, is_deleted, permission_id)
 SELECT '文章管理', 'Article Management', 2, NULL, '/content/article', 0, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/content/article')
@@ -224,6 +231,15 @@ INSERT INTO `sys_menu` (label, label_en, type, router, `order`, state, created_a
 SELECT '删除角色', 'Delete', 3, '/system/role', 4, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/authority/role/delete')
 FROM (SELECT id FROM `sys_menu` WHERE label = '角色管理') AS parent_menu;
 
+-- 插入日志管理按钮菜单
+INSERT INTO `sys_menu` (label, label_en, type, router, `order`, state, created_at, updated_at, parent_id, is_deleted, permission_id)
+SELECT '日志列表', 'Index', 3, '/system/log', 0, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/authority/log/index')
+FROM (SELECT id FROM `sys_menu` WHERE label = '日志管理') AS parent_menu;
+
+INSERT INTO `sys_menu` (label, label_en, type, router, `order`, state, created_at, updated_at, parent_id, is_deleted, permission_id)
+SELECT '删除日志', 'Delete', 3, '/system/log', 1, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/authority/log/delete')
+FROM (SELECT id FROM `sys_menu` WHERE label = '日志管理') AS parent_menu;
+
 -- 插入文章管理按钮菜单
 INSERT INTO `sys_menu` (label, label_en, type, router, `order`, state, created_at, updated_at, parent_id, is_deleted, permission_id)
 SELECT '文章列表', 'Index', 3, '/content/article', 0, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), parent_menu.id, 0, (SELECT id FROM `sys_permission` WHERE name = '/content/article/index')
@@ -264,7 +280,8 @@ VALUES
     ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='用户管理')),
     ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='菜单管理')),
     ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='角色管理')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='文章管理'));
+    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='文章管理')),
+    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='日志管理'));
 
 -- 关联角色与菜单（按钮菜单）
 INSERT INTO `role_menu` (role_id, menu_id)
@@ -289,7 +306,9 @@ VALUES
     ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='查看文章')),
     ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='创建文章')),
     ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='修改文章')),
-    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='删除文章'));
+    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='删除文章')),
+    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='日志列表')),
+    ((SELECT id FROM `sys_role` WHERE name='admin'), (SELECT id FROM `sys_menu` WHERE label='删除日志'));
 
 -- 提交事务
 COMMIT;

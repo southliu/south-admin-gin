@@ -100,21 +100,16 @@ func UpdateMenu(id int64, dto models.UpdateMenuDto) (*models.Menu, error) {
 
 	menu.Label = dto.Label
 	menu.LabelEn = dto.LabelEn
-	if dto.Type != 0 {
-		menu.Type = dto.Type
-	}
 	menu.Icon = dto.Icon
 	menu.Router = dto.Router
 	menu.Rule = dto.Rule
-	if dto.Order != 0 {
-		menu.Order = dto.Order
-	}
-	if dto.State != 0 {
-		menu.State = dto.State
-	}
+	// 前端编辑表单总是提交完整数据，直接赋值以支持置零（如 state=0 隐藏、order=0）
+	menu.Type = dto.Type
+	menu.Order = dto.Order
+	menu.State = dto.State
 	menu.ParentID = dto.ParentID
 
-	// 处理权限
+	// 处理权限：非空 → 复用/新建或重命名；空值 → 解除关联（权限记录保留由权限管理维护）
 	if dto.Rule != "" {
 		// 如果菜单已有权限，更新现有权限的name和description
 		if menu.PermissionID != nil {
@@ -153,6 +148,9 @@ func UpdateMenu(id int64, dto models.UpdateMenuDto) (*models.Menu, error) {
 			}
 			menu.PermissionID = &permission.ID
 		}
+	} else if menu.PermissionID != nil {
+		// rule 置空：解除权限关联，权限记录保留由权限管理维护
+		menu.PermissionID = nil
 	}
 
 	return menu, database.DB.Save(menu).Error
@@ -416,11 +414,22 @@ func GetMenuPage(page, pageSize int, label, labelEn string, state *int, rule str
 
 	tree := buildMenuTree(menus, nil)
 
-	// 计算总数
+	// 计算总数：跟随过滤条件，只统计根节点（与展示的树根一致）
+	countQuery := database.DB.Model(&models.Menu{}).Where("is_deleted = 0 AND parent_id IS NULL")
+	if label != "" {
+		countQuery = countQuery.Where("label LIKE ?", "%"+label+"%")
+	}
+	if labelEn != "" {
+		countQuery = countQuery.Where("label_en LIKE ?", "%"+labelEn+"%")
+	}
+	if state != nil {
+		countQuery = countQuery.Where("state = ?", *state)
+	}
+	if rule != "" {
+		countQuery = countQuery.Where("rule LIKE ?", "%"+rule+"%")
+	}
 	var total int64
-	database.DB.Model(&models.Menu{}).
-		Where("is_deleted = 0 AND ((type = 1 AND parent_id IS NULL) OR (type = 2 AND parent_id IS NULL))").
-		Count(&total)
+	countQuery.Count(&total)
 
 	return map[string]interface{}{
 		"items": tree,

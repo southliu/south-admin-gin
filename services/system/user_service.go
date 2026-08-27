@@ -119,18 +119,11 @@ func UpdateUser(id int64, dto models.UpdateUserDto) (*models.User, error) {
 		user.Password = hashedPassword
 	}
 
-	if dto.Name != "" {
-		user.Name = dto.Name
-	}
-	if dto.Email != "" {
-		user.Email = dto.Email
-	}
-	if dto.Phone != "" {
-		user.Phone = dto.Phone
-	}
-	if dto.Status != 0 {
-		user.Status = dto.Status
-	}
+	// 前端编辑表单总是提交完整数据，直接赋值以支持清空与置零（如 status=0 禁用）
+	user.Name = dto.Name
+	user.Email = dto.Email
+	user.Phone = dto.Phone
+	user.Status = dto.Status
 
 	err = database.DB.Save(user).Error
 	if err != nil {
@@ -160,6 +153,18 @@ func DeleteUser(id int64) error {
 	}).Error
 }
 
+// BatchDeleteUser 批量删除用户
+func BatchDeleteUser(ids []int64) error {
+	if len(ids) == 0 {
+		return errors.New("请选择要删除的用户")
+	}
+
+	return database.DB.Model(&models.User{}).Where("id IN ? AND is_deleted = 0", ids).Updates(map[string]interface{}{
+		"is_deleted": 1,
+		"deleted_at": models.CustomTime(time.Now().Unix()),
+	}).Error
+}
+
 // GetUserList 获取用户列表
 func GetUserList() ([]models.User, error) {
 	var users []models.User
@@ -169,15 +174,28 @@ func GetUserList() ([]models.User, error) {
 	return users, err
 }
 
+// UserPageFilter 用户分页查询过滤条件
+type UserPageFilter struct {
+	Username string
+	Email    string
+	Phone    string
+}
+
 // GetUserPage 获取用户分页列表
-func GetUserPage(page, pageSize int, username string) (*models.PageResult, error) {
+func GetUserPage(page, pageSize int, filter UserPageFilter) (*models.PageResult, error) {
 	var users []models.User
 	var total int64
 
 	query := database.DB.Model(&models.User{}).Where("is_deleted = 0")
 
-	if username != "" {
-		query = query.Where("username LIKE ?", "%"+username+"%")
+	if filter.Username != "" {
+		query = query.Where("username LIKE ?", "%"+filter.Username+"%")
+	}
+	if filter.Email != "" {
+		query = query.Where("email LIKE ?", "%"+filter.Email+"%")
+	}
+	if filter.Phone != "" {
+		query = query.Where("phone LIKE ?", "%"+filter.Phone+"%")
 	}
 
 	err := query.Count(&total).Error

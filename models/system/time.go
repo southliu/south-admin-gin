@@ -56,10 +56,7 @@ func (t *CustomTime) Scan(value interface{}) error {
 	return nil
 }
 
-// Value 写入数据库时转换为 DATETIME
+// Value 写入数据库时转换为整型时间戳（表字段为 BIGINT）
 func (t CustomTime) Value() (driver.Value, error) {
-	if t == 0 {
-		return nil, nil
-	}
-	return time.Unix(int64(t), 0), nil
+	return int64(t), nil
 }

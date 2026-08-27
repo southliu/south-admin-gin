@@ -17,6 +17,7 @@ func InitUserRoutes(r *gin.RouterGroup) {
 	auth.POST("/create", v1.CreateUser)
 	auth.PUT("/update/:id", v1.UpdateUser)
 	auth.DELETE("/:id", v1.DeleteUser)
+	auth.POST("/batchDelete", v1.BatchDeleteUser)
 	auth.GET("/list", v1.GetUserList)
 	auth.POST("/updatePassword", v1.UpdatePassword)
 }

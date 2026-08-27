@@ -40,7 +40,7 @@ func GetMenuList(c *gin.Context) {
 // GetMenuPage 获取菜单分页列表
 func GetMenuPage(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", c.DefaultQuery("page_size", "10")))
 	label := c.Query("label")
 	labelEn := c.Query("labelEn")
 	rule := c.Query("rule")

@@ -10,5 +10,6 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	system.InitSystemRoutes(r.Group("/system"))
+	initDashboardRoutes(r)
 	return r
 }
